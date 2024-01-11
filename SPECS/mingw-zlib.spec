@@ -1,36 +1,26 @@
 %{?mingw_package_header}
 
 Name:           mingw-zlib
-Version:        1.2.12
+Version:        1.2.13
 Release:        2%{?dist}
 Summary:        MinGW Windows zlib compression library
 
-License:        zlib
+License:        Zlib
 URL:            http://www.zlib.net/
 Source0:        http://www.zlib.net/zlib-%{version}.tar.xz
-# Replace the zlib build system with an autotools based one
-Patch3:         mingw32-zlib-1.2.7-autotools.patch
-# The .def file contains an empty LIBRARY line which isn't valid
-Patch5:         zlib-1.2.7-use-correct-def-file.patch
-# Libtool tries to make a libz-1.dll while we expect zlib1.dll
-# Force this by hacking the ltmain.sh
-Patch6:         mingw32-zlib-create-zlib1-dll.patch
+# Use UNIX naming convention for libraries
+Patch0:         mingw-zlib-cmake.patch
 
 BuildArch:      noarch
 
-BuildRequires: make
+BuildRequires:  cmake
+BuildRequires:  make
+
 BuildRequires:  mingw32-filesystem >= 95
 BuildRequires:  mingw32-gcc
-BuildRequires:  mingw32-binutils
 
 BuildRequires:  mingw64-filesystem >= 95
 BuildRequires:  mingw64-gcc
-BuildRequires:  mingw64-binutils
-
-BuildRequires:  perl-interpreter
-BuildRequires:  autoconf
-BuildRequires:  automake
-BuildRequires:  libtool
 
 
 %description
@@ -72,44 +62,19 @@ The mingw64-zlib-static package contains static library for mingw64-zlib develop
 
 
 %prep
-%setup -q -n zlib-%{version}
-%patch3 -p1 -b .atools
-%patch5 -p1 -b .def
-# patch cannot create an empty dir
-mkdir m4
-iconv -f windows-1252 -t utf-8 <ChangeLog >ChangeLog.tmp
-
-autoreconf --install --force
-
-%patch6 -p0 -b .libtool
+%autosetup -p1 -n zlib-%{version}
 
 
 %build
-%mingw_configure
+MINGW32_CMAKE_ARGS=-DINSTALL_PKGCONFIG_DIR=%{mingw32_libdir}/pkgconfig \
+MINGW64_CMAKE_ARGS=-DINSTALL_PKGCONFIG_DIR=%{mingw64_libdir}/pkgconfig \
+%mingw_cmake
+%mingw_make_build
 %mingw_make_build
 
 
 %install
-# Libtool tries to install a file called libz-1.dll
-# but this isn't created anymore due to patch #6
-# Fool libtool until a proper fix has been found
-touch build_win32/.libs/libz-1.dll build_win64/.libs/libz-1.dll
 %mingw_make_install
-
-# Manually install the correct zlib.dll
-install -m 0644 build_win32/.libs/zlib1.dll %{buildroot}%{mingw32_bindir}/
-install -m 0644 build_win64/.libs/zlib1.dll %{buildroot}%{mingw64_bindir}/
-
-# Install the pkgconfig file
-install -Dm 0644 build_win32/zlib.pc %{buildroot}%{mingw32_libdir}/pkgconfig/zlib.pc
-install -Dm 0644 build_win64/zlib.pc %{buildroot}%{mingw64_libdir}/pkgconfig/zlib.pc
-
-# Drop the fake libz-1.dll
-rm -f %{buildroot}%{mingw32_bindir}/libz-1.dll
-rm -f %{buildroot}%{mingw64_bindir}/libz-1.dll
-
-# Drop all .la files
-find %{buildroot} -name "*.la" -delete
 
 # Drop the man pages
 rm -rf %{buildroot}%{mingw32_mandir}
@@ -140,20 +105,26 @@ rm -rf %{buildroot}%{mingw64_mandir}
 
 
 %changelog
-* Mon Jul 11 2022 Konstantin Kostiuk <kkostiuk@redhat.com> - 1.2.12-2
-- Fix changelog
-  Related: rhbz#2068371
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
 
-* Tue Jul 07 2022 Konstantin Kostiuk <kkostiuk@redhat.com> - 1.2.12-1
-- Bump version to 1.2.12 to fix CVE-2018-25032
-  Related: rhbz#2068371
+* Tue Dec 13 2022 Sandro Mani <manisandro@gmail.com> - 1.2.13-1
+- Update to 1.2.13
 
-* Mon Aug 09 2021 Mohan Boddu <mboddu@redhat.com> - 1.2.11-7
-- Rebuilt for IMA sigs, glibc 2.34, aarch64 flags
-  Related: rhbz#1991688
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.12-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
-* Fri Apr 16 2021 Mohan Boddu <mboddu@redhat.com> - 1.2.11-6
-- Rebuilt for RHEL 9 BETA on Apr 15th 2021. Related: rhbz#1947937
+* Thu Jun 30 2022 Sandro Mani <manisandro@gmail.com> - 1.2.12-1
+- Update to 1.2.12
+
+* Fri Mar 25 2022 Sandro Mani <manisandro@gmail.com> - 1.2.11-8
+- Rebuild with mingw-gcc-12
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.11-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.11-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.11-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
