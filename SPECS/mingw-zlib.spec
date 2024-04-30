@@ -1,13 +1,13 @@
 %{?mingw_package_header}
 
 Name:           mingw-zlib
-Version:        1.2.13
-Release:        2%{?dist}
+Version:        1.3.1
+Release:        1%{?dist}
 Summary:        MinGW Windows zlib compression library
 
 License:        Zlib
-URL:            http://www.zlib.net/
-Source0:        http://www.zlib.net/zlib-%{version}.tar.xz
+URL:            https://www.zlib.net/
+Source0:        https://www.zlib.net/zlib-%{version}.tar.xz
 # Use UNIX naming convention for libraries
 Patch0:         mingw-zlib-cmake.patch
 
@@ -105,6 +105,18 @@ rm -rf %{buildroot}%{mingw64_mandir}
 
 
 %changelog
+* Wed Jan 31 2024 Sandro Mani <manisandro@gmail.com> - 1.3.1-1
+- Update to 1.3.1
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.13-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.13-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.13-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
 * Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.13-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
 
